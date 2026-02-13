@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="taskGroup(title, statusName, cssClass, showForm)"
+     th:with="filteredTasks=${user.tasks.?[status.name() == #vars.statusName]}">
+
+    <section class="tasks-group">
+
+        <h3 th:text="${title}">Título</h3>
+
+        <!-- Mensaje si está vacío -->
+        <div th:if="${#lists.isEmpty(filteredTasks)}">
+            No hay tareas en este estado.
+        </div>
+
+        <!-- Formulario (solo si aplica) -->
+        <form th:if="${showForm}"
+              method="POST"
+              class="new-task-form"
+              th:object="${newTask}">
+
+            <label>Nueva tarea:</label>
+            <input th:field="*{description}" type="text" placeholder="Describe la tarea..." />
+
+            <span class="validationError"
+                  th:if="${#fields.hasErrors('description')}"
+                  th:errors="*{description}"></span>
+
+            <select th:field="*{deadline}">
+                <option value="">Fecha límite:</option>
+                <option value="1WEEK">1 semana</option>
+                <option value="1MONTH">1 mes</option>
+            </select>
+
+            <input type="hidden" name="status" th:value="${statusName}" />
+
+            <button type="submit">Crear tarea</button>
+        </form>
+
+        <!-- Listado -->
+        <div th:each="task : ${filteredTasks}">
+            <div class="task-item" th:classappend="${cssClass}">
+
+                <div class="task-desc" th:text="${task.description}"></div>
+
+                <!-- BOTÓN AVANZAR -->
+                <form th:if="${task.status.name() != 'DONE'}"
+                      th:action="@{/user/tasks/advance}"
+                      method="post">
+
+                    <input type="hidden" name="id" th:value="${task.id}" />
+                    <button type="submit">Avanzar</button>
+                </form>
+
+                <div th:if="${task.deadline != null}">
+                    <strong>Fecha límite:</strong>
+                    <span th:text="${#temporals.format(task.deadline, 'dd/MMMM/yyyy')}"></span>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+</body>
+</html>

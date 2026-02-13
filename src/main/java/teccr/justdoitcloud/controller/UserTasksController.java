@@ -47,4 +47,26 @@ public class UserTasksController {
         user.addTask(newTask);
         return "redirect:/user/tasks";
     }
+
+    @PostMapping("/advance")
+    public String advanceTask(@RequestParam Long id,
+                              @ModelAttribute("user") User user) {
+
+        for (Task task : user.getTasks()) {
+
+            if (task.getId().equals(id)) {
+
+                if (task.getStatus() == Task.Status.PENDING) {
+                    task.setStatus(Task.Status.INPROGRESS);
+                } else if (task.getStatus() == Task.Status.INPROGRESS) {
+                    task.setStatus(Task.Status.DONE);
+                }
+
+                break;
+            }
+        }
+
+        return "redirect:/user/tasks";
+    }
+
 }
